@@ -9,7 +9,9 @@ uruchamianie testów:
 ```npm run test``` || ```pnpm test```
 
 .env example:
+```
 PORT=
 BINANCE_API_URL=https://api.binance.com/api/v3
 SYMBOL=
 INTERVAL=
+```
