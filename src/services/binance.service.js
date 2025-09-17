@@ -9,7 +9,17 @@ export const getMarketData = async (symbol, interval) => {
       params: { symbol: symbol, interval },
     });
 
-    return data;
+    // zwraca 12 elementową tablice, interesuje nas otwarcie i zamkniecie danej swiecy
+    // wiec pole 2 i 5
+    // pole 1 to openTime, pole 7 to closetime
+    return data.map((klines) => {
+      return {
+        openTime: klines[0],
+        openPrice: klines[1],
+        closeTime: klines[6],
+        closePrice: klines[4],
+      };
+    });
   } catch (err) {
     console.error(err);
   }
