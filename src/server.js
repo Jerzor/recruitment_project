@@ -18,7 +18,8 @@ const symbol = process.env.SYMBOL;
 const interval = process.env.INTERVAL;
 
 const start = async () => {
-  await connectDb();
+  // nie ma potrzeby łączenia sie z DB
+  // await connectDb();
 
   //pobieranie historycznych swiec z marketu dla danego symbolu i intervale
   const symbolKlines = await getMarketData(symbol, interval);
@@ -31,17 +32,37 @@ const start = async () => {
         parseFloat(kline.closePrice),
       );
 
+      //kolor mówiacy o tym, czy swieca zamkneła sie ze wzrostem, spadkiem czy bez zmain
+      const klineColor =
+        kline.closePrice === kline.openPrice
+          ? "neutral"
+          : kline.closePrice > kline.openPrice
+            ? "green"
+            : "red";
+
       return {
         ...kline,
         delta,
+        klineColor,
       };
     }),
     "openTime",
   );
 
-  symbolKlinesWithDelta.map((kline) => {});
+  const sortedDeltas = symbolKlinesWithDelta.map((kline) => {
+    return kline.delta;
+  });
 
-  console.log(symbolKlinesWithDelta);
+  let accumulator = 1;
+
+  sortedDeltas.map((delta) => {
+    // 1 + delta musi być wieksze od 0
+    if (1 + delta > 0) accumulator *= 1 + delta;
+  });
+
+  //skumulowany zwrot okresu w ujeciu prostym w %
+  const cumulative = (accumulator - 1) * 100;
+  const cumulativePercentage = `${cumulative.toFixed(4)}%`;
 
   app.listen(port, () => {
     console.info(`Listening on port ${port}`);
