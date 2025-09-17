@@ -1,9 +1,8 @@
 import * as dotenv from "dotenv";
 import express from "express";
-import { connectDb } from "./db/connectDb.js";
 import { getMarketData } from "./services/binance.service.js";
 import { klinesDiff } from "./utils/utils.js";
-import { sortBy } from "lodash-es";
+import { maxBy, minBy, sortBy } from "lodash-es";
 
 dotenv.config();
 
@@ -32,7 +31,8 @@ const start = async () => {
         parseFloat(kline.closePrice),
       );
 
-      //kolor mówiacy o tym, czy swieca zamkneła sie ze wzrostem, spadkiem czy bez zmain
+      // kolor mówiacy o tym, czy swieca zamkneła sie ze wzrostem, spadkiem czy bez zmain
+      // mozna tez po delcie sprawdzać
       const klineColor =
         kline.closePrice === kline.openPrice
           ? "neutral"
@@ -63,6 +63,22 @@ const start = async () => {
   //skumulowany zwrot okresu w ujeciu prostym w %
   const cumulative = (accumulator - 1) * 100;
   const cumulativePercentage = `${cumulative.toFixed(4)}%`;
+
+  console.log(
+    `Świece dla interwału: ${interval}, dla symbolu: ${symbol}: `,
+    symbolKlinesWithDelta,
+  );
+
+  const deltaMax = maxBy(symbolKlinesWithDelta, "delta").delta.toFixed(4);
+  const deltaMin = minBy(symbolKlinesWithDelta, "delta").delta.toFixed(4);
+
+  console.log(`Maksymalne odchylenie delta = ${deltaMax}`);
+  console.log(`Minimalne odchylenie delta = ${deltaMin}`);
+
+  console.log(
+    "Skumulowany zwrot okresu w ujeciu prostym:",
+    cumulativePercentage,
+  );
 
   app.listen(port, () => {
     console.info(`Listening on port ${port}`);
